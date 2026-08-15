@@ -1,0 +1,156 @@
+{% extends "admin/_base.html" %}
+{% set active_nav = "products" %}
+{% block title %}Адмін — {{ 'редагування товару' if is_edit else 'новий товар' }}{% endblock %}
+
+{% block admin_content %}
+<a href="{{ url_for('admin.products_list') }}" class="back-link"><i class="fa-solid fa-arrow-left"></i> До списку товарів</a>
+<div class="admin-page-head">
+  <h2>{{ 'Редагування товару' if is_edit else 'Новий товар' }}</h2>
+</div>
+
+<form method="POST" class="admin-form" id="productForm" enctype="multipart/form-data">
+  <div class="form-grid">
+    {% set has_subs = grouped_categories|selectattr("1")|list %}
+    {% if not has_subs %}
+    <div class="flash flash--error" style="grid-column: 1 / -1;">
+      Підкатегорій ще немає. <a href="{{ url_for('admin.categories_list') }}" style="text-decoration: underline;">Спершу додайте хоча б одну</a>.
+    </div>
+    {% endif %}
+    <label class="field">
+      <span>Назва товару</span>
+      <input type="text" name="name" value="{{ form.get('name', '') }}" placeholder="Худі «Міське»" required>
+    </label>
+    <label class="field">
+      <span>Бренд</span>
+      <input type="text" name="brand" value="{{ form.get('brand', '') }}" placeholder="Original Brands" required>
+    </label>
+    <label class="field">
+      <span>Артикул (SKU)</span>
+      <input type="text" name="sku" value="{{ form.get('sku', '') }}" placeholder="MTK-HD-001" required>
+    </label>
+    <label class="field">
+      <span>Базова ціна, ₴</span>
+      <input type="number" step="0.01" min="0" name="price" value="{{ form.get('price', '') }}" placeholder="1290" required>
+    </label>
+    <label class="field">
+      <span>Ціна зі знижкою, ₴ <small>(необов'язково)</small></span>
+      <input type="number" step="0.01" min="0" name="discount_price" value="{{ form.get('discount_price', '') }}" placeholder="990">
+    </label>
+    <label class="field">
+      <span>Підкатегорія</span>
+      <select name="category_id" required>
+        <option value="">— Оберіть підкатегорію —</option>
+        {% for top, subs in grouped_categories %}
+        <optgroup label="{{ top.name }}">
+          {% for sub in subs %}
+          <option value="{{ sub.id }}" {{ 'selected' if form.get('category_id')|string == sub.id|string }}>{{ sub.name }}</option>
+          {% endfor %}
+        </optgroup>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+
+  <label class="field" style="margin-top: -14px;">
+    <span>Опис товару <small>(необов'язково)</small></span>
+    <textarea name="description" rows="4" placeholder="Матеріал, склад, особливості крою…">{{ form.get('description', '') }}</textarea>
+  </label>
+
+  <div>
+    <div class="form-section__head">
+      <h3>Стандартні розміри</h3>
+      <p>Впишіть кількість для тих розмірів, які є в наявності. Порожнє поле — розмір не додається.</p>
+    </div>
+    <div class="std-size-grid">
+      {% for sz in std_sizes %}
+      <label class="std-size">
+        <span>{{ sz }}</span>
+        <input type="number" min="0" name="qty_{{ sz }}" value="{{ form.get('qty_' ~ sz, '') }}" placeholder="0">
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="form-section__head">
+      <h3>Додаткові розміри <small>(необов'язково)</small></h3>
+      <p>Для нестандартних значень — наприклад, числові розміри джинсів: 30, 32, 34.</p>
+    </div>
+    <div id="sizeRows" class="repeatable">
+      {% for size, qty in custom_rows %}
+      <div class="repeatable__row">
+        <input type="text" name="size[]" value="{{ size }}" placeholder="Наприклад, 32" class="repeatable__size">
+        <input type="number" name="quantity[]" value="{{ qty }}" min="0" placeholder="Кількість" class="repeatable__qty">
+        <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати розмір">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" id="addSizeRow" class="btn btn--ghost">
+      <i class="fa-solid fa-plus"></i>&nbsp; Додати розмір
+    </button>
+  </div>
+
+  <div>
+    <div class="form-section__head">
+      <h3>Фото товару <small>(необов'язково)</small></h3>
+      <p>Завантажте файл із комп'ютера або вставте посилання — досить одного з двох. Перший рядок стане головним фото.</p>
+    </div>
+
+    {% if existing_photos %}
+    <div class="existing-photos">
+      {% for photo in existing_photos %}
+      <label class="existing-photo {{ 'existing-photo--main' if photo.is_main else '' }}">
+        <img src="{{ photo.url }}" alt="">
+        {% if photo.is_main %}<span class="existing-photo__main-tag">Головне</span>{% endif %}
+        <span class="existing-photo__delete">
+          <input type="checkbox" name="delete_photo[]" value="{{ photo.id }}">
+          <i class="fa-solid fa-trash"></i> Видалити
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div id="photoRows" class="repeatable">
+      <div class="repeatable__row repeatable__row--photo">
+        <input type="file" name="photo_file[]" accept="image/png,image/jpeg,image/webp,image/gif" class="repeatable__file">
+        <span class="repeatable__or">або</span>
+        <input type="url" name="photo_url[]" placeholder="https://…" class="repeatable__url">
+        <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати фото">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+    <button type="button" id="addPhotoRow" class="btn btn--ghost">
+      <i class="fa-solid fa-plus"></i>&nbsp; Додати фото
+    </button>
+  </div>
+
+  <div>
+    <div class="form-section__head">
+      <h3>Показ на головній сторінці <small>(необов'язково)</small></h3>
+      <p>Якщо нічого не позначити — сайт сам підбере товари (новинки за датою, знижки за наявністю ціни зі знижкою, хіти за продажами).</p>
+    </div>
+    <div class="filters__checks">
+      <label class="filters__check">
+        <input type="checkbox" name="is_featured_hit" {{ 'checked' if form.get('is_featured_hit') }}>
+        <span>Хіти продажів</span>
+      </label>
+      <label class="filters__check">
+        <input type="checkbox" name="is_featured_new" {{ 'checked' if form.get('is_featured_new') }}>
+        <span>Новинки</span>
+      </label>
+      <label class="filters__check">
+        <input type="checkbox" name="is_featured_sale" {{ 'checked' if form.get('is_featured_sale') }}>
+        <span>Знижки</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="admin-form__submit">
+    <button type="submit" class="btn btn--primary">{{ 'Зберегти зміни' if is_edit else 'Зберегти товар' }}</button>
+  </div>
+</form>
+{% endblock %}

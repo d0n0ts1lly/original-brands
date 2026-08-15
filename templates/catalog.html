@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "_product_card.html" import product_card %}
+{% block title %}{{ active_sub.name if active_sub else (active_category.name if active_category else 'Каталог') }} — Original Brands{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('main.index') }}">Головна</a>
+  <span>/</span>
+  {% if active_category %}
+  <a href="{{ url_for('catalog.catalog', cat_slug=active_category.slug) }}">{{ active_category.name }}</a>
+  {% if active_sub %}
+  <span>/</span>
+  <span>{{ active_sub.name }}</span>
+  {% endif %}
+  {% else %}
+  <span>Каталог</span>
+  {% endif %}
+</div>
+
+<section class="catalog">
+  <div class="section-head">
+    <span class="eyebrow">{% if active_category %}{{ active_category.name }}{% else %}Усі товари{% endif %}</span>
+    <h2>{{ active_sub.name if active_sub else 'Каталог' }}</h2>
+  </div>
+
+  <div class="catalog-layout">
+    <form method="GET" class="filters" id="filtersForm">
+      <div class="filters__group">
+        <h4>Пошук</h4>
+        <div class="filters__search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" name="q" value="{{ q }}" placeholder="Назва, бренд, артикул…">
+        </div>
+      </div>
+
+      <div class="filters__group">
+        <h4>Ціна, ₴</h4>
+        <div class="filters__price">
+          <input type="number" name="price_min" value="{{ price_min }}" placeholder="Від" min="0">
+          <span>—</span>
+          <input type="number" name="price_max" value="{{ price_max }}" placeholder="До" min="0">
+        </div>
+      </div>
+
+      {% if available_sizes %}
+      <div class="filters__group">
+        <h4>Розмір</h4>
+        <div class="filters__checks">
+          {% for sz in available_sizes %}
+          <label class="filters__check">
+            <input type="checkbox" name="size" value="{{ sz }}" {{ 'checked' if sz in selected_sizes }}>
+            <span>{{ sz }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if available_brands %}
+      <div class="filters__group">
+        <h4>Бренд</h4>
+        <div class="filters__checks filters__checks--list">
+          {% for b in available_brands %}
+          <label class="filters__check">
+            <input type="checkbox" name="brand" value="{{ b }}" {{ 'checked' if b in selected_brands }}>
+            <span>{{ b }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn--primary filters__submit">Застосувати</button>
+      {% if selected_brands or selected_sizes or price_min or price_max or q %}
+      <a href="{{ request.path }}" class="filters__reset">Скинути всі фільтри</a>
+      {% endif %}
+    </form>
+
+    <div class="catalog-results">
+      <div class="catalog-results__head">
+        <span>{{ products|length }} {{ 'товар' if products|length == 1 else 'товарів' }}</span>
+        <label class="catalog-results__sort">
+          <span>Сортування:</span>
+          <select name="sort" form="filtersForm" onchange="document.getElementById('filtersForm').submit()">
+            {% for value, label in sort_labels.items() %}
+            <option value="{{ value }}" {{ 'selected' if value == sort }}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      {% if products %}
+      <div class="product-grid is-active catalog__grid">
+        {% for p in products %}
+        {{ product_card(p) }}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-box-open"></i>
+        <p>За цим запитом нічого не знайдено.</p>
+        <a href="{{ url_for('catalog.catalog') }}" class="btn btn--primary">Дивитися весь каталог</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

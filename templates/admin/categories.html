@@ -1,0 +1,123 @@
+{% extends "admin/_base.html" %}
+{% set active_nav = "categories" %}
+{% block title %}Адмін — категорії{% endblock %}
+
+{% block admin_content %}
+<div class="admin-page-head">
+  <h2>Категорії</h2>
+</div>
+
+<div class="category-tree">
+  {% for top in top_levels %}
+  <div class="category-tree__group">
+    <div class="category-tree__top-row">
+      <p class="category-tree__top">
+        {% if top.photo_url %}
+        <img src="{{ top.photo_url }}" alt="" class="category-tree__thumb">
+        {% else %}
+        <i class="fa-solid fa-folder"></i>
+        {% endif %}
+        {{ top.name }}
+      </p>
+      <div class="category-tree__actions">
+        <button type="button" class="icon-btn" aria-label="Редагувати" onclick="document.getElementById('edit-{{ top.id }}').classList.toggle('is-open')">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <form method="POST" action="{{ url_for('admin.category_delete', category_id=top.id) }}" onsubmit="return confirm('Видалити «{{ top.name }}» разом з підкатегоріями?');">
+          <button type="submit" class="icon-btn icon-btn--danger" aria-label="Видалити"><i class="fa-solid fa-trash"></i></button>
+        </form>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.category_edit', category_id=top.id) }}" class="category-edit-form" id="edit-{{ top.id }}" enctype="multipart/form-data">
+      <input type="text" name="name" value="{{ top.name }}" required>
+      <input type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <input type="url" name="photo_url" placeholder="або посилання на фото">
+      {% if top.photo_url %}
+      <label class="category-edit-form__remove"><input type="checkbox" name="remove_photo" value="1"> Прибрати фото</label>
+      {% endif %}
+      <label class="category-edit-form__remove">
+        <input type="checkbox" name="is_featured" value="1" {{ 'checked' if top.is_featured }}> На головній
+      </label>
+      <button type="submit" class="btn btn--ghost">Зберегти</button>
+    </form>
+
+    {% if top.children %}
+    <ul class="category-tree__children">
+      {% for sub in top.children %}
+      <li>
+        <span class="category-tree__sub-name">
+          {% if sub.photo_url %}
+          <img src="{{ sub.photo_url }}" alt="" class="category-tree__thumb category-tree__thumb--sm">
+          {% endif %}
+          {{ sub.name }} <span class="sku">/{{ top.slug }}/{{ sub.slug }}</span>
+          {% if sub.is_featured %}<span class="featured-tag"><i class="fa-solid fa-star"></i> на головній</span>{% endif %}
+        </span>
+        <span class="category-tree__actions">
+          <button type="button" class="icon-btn" aria-label="Редагувати" onclick="document.getElementById('edit-{{ sub.id }}').classList.toggle('is-open')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <form method="POST" action="{{ url_for('admin.category_delete', category_id=sub.id) }}" onsubmit="return confirm('Видалити «{{ sub.name }}»?');">
+            <button type="submit" class="icon-btn icon-btn--danger" aria-label="Видалити"><i class="fa-solid fa-trash"></i></button>
+          </form>
+        </span>
+      </li>
+      <li>
+        <form method="POST" action="{{ url_for('admin.category_edit', category_id=sub.id) }}" class="category-edit-form" id="edit-{{ sub.id }}" enctype="multipart/form-data" style="width:100%;">
+          <input type="text" name="name" value="{{ sub.name }}" required>
+          <select name="parent_id">
+            {% for t in top_levels %}
+            <option value="{{ t.id }}" {{ 'selected' if t.id == top.id }}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif">
+          <input type="url" name="photo_url" placeholder="або посилання на фото">
+          {% if sub.photo_url %}
+          <label class="category-edit-form__remove"><input type="checkbox" name="remove_photo" value="1"> Прибрати фото</label>
+          {% endif %}
+          <label class="category-edit-form__remove">
+            <input type="checkbox" name="is_featured" value="1" {{ 'checked' if sub.is_featured }}> На головній
+          </label>
+          <button type="submit" class="btn btn--ghost">Зберегти</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="category-tree__empty">Підкатегорій ще немає</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<h3 class="admin-block-title">Додати категорію</h3>
+<p class="admin-block-hint">Щоб додати підкатегорію (наприклад, «Худі») — оберіть головну категорію нижче. Якщо залишити «Це головна категорія» — створиться новий верхній розділ, як Чоловіче/Жіноче/Дитяче. Фото необов'язкове — можна завантажити файл або вставити посилання.</p>
+<form method="POST" action="{{ url_for('admin.category_new') }}" class="form-grid" enctype="multipart/form-data">
+  <label class="field">
+    <span>Назва</span>
+    <input type="text" name="name" placeholder="Наприклад, Худі" required>
+  </label>
+  <label class="field">
+    <span>Розділ</span>
+    <select name="parent_id">
+      <option value="">— Це головна категорія —</option>
+      {% for top in top_levels %}
+      <option value="{{ top.id }}">{{ top.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field">
+    <span>Фото <small>(файл)</small></span>
+    <input type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif">
+  </label>
+  <label class="field">
+    <span>Фото <small>(або посилання)</small></span>
+    <input type="url" name="photo_url" placeholder="https://…">
+  </label>
+  <label class="filters__check" style="align-self:center;">
+    <input type="checkbox" name="is_featured" value="1">
+    <span>Показувати на головній</span>
+  </label>
+  <button type="submit" class="btn btn--primary" style="grid-column: 1 / -1;">Додати</button>
+</form>
+{% endblock %}

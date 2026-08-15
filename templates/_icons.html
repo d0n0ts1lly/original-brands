@@ -1,0 +1,10 @@
+{% macro icon(name, size=22) %} {% set fa = { 'truck': 'fa-truck-fast',
+'return': 'fa-rotate-left', 'cash': 'fa-money-bill-wave', 'check':
+'fa-shield-halved', 'tshirt': 'fa-shirt', 'hoodie': 'fa-vest-patches', 'jeans':
+'fa-socks', 'jacket': 'fa-vest' } %}
+<i
+  class="fa-solid {{ fa[name] }}"
+  style="font-size:{{ size }}px"
+  aria-hidden="true"
+></i>
+{% endmacro %}

@@ -1,0 +1,16 @@
+# Секрети
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Завантажені користувачем фото товарів/категорій
+static/uploads/
+
+# ОС/IDE сміття
+.DS_Store
+.vscode/
+.idea/

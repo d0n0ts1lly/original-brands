@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Таблиця розмірів — Original Brands{% endblock
+%} {% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('main.index') }}">Головна</a><span>/</span
+  ><span>Таблиця розмірів</span>
+</div>
+<article class="content-page">
+  <span class="eyebrow">Орієнтир</span>
+  <h1>Таблиця розмірів</h1>
+  <p>
+    Виміри в сантиметрах. Якщо значення між двома розмірами — радимо брати
+    більший, особливо для худі та курток (вони носяться вільніше).
+  </p>
+
+  <div class="size-table-wrap">
+    <table class="size-table">
+      <thead>
+        <tr>
+          <th>Розмір</th>
+          <th>Обхват грудей</th>
+          <th>Обхват талії</th>
+          <th>Обхват стегон</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>XS</td>
+          <td>84–88</td>
+          <td>64–68</td>
+          <td>90–94</td>
+        </tr>
+        <tr>
+          <td>S</td>
+          <td>88–92</td>
+          <td>68–72</td>
+          <td>94–98</td>
+        </tr>
+        <tr>
+          <td>M</td>
+          <td>92–98</td>
+          <td>72–78</td>
+          <td>98–104</td>
+        </tr>
+        <tr>
+          <td>L</td>
+          <td>98–104</td>
+          <td>78–84</td>
+          <td>104–110</td>
+        </tr>
+        <tr>
+          <td>XL</td>
+          <td>104–112</td>
+          <td>84–92</td>
+          <td>110–118</td>
+        </tr>
+        <tr>
+          <td>XXL</td>
+          <td>112–120</td>
+          <td>92–100</td>
+          <td>118–126</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Як виміряти себе</h2>
+  <ul>
+    <li>
+      <strong>Груди</strong> — по найширшій частині, стрічка горизонтально
+    </li>
+    <li><strong>Талія</strong> — по найвужчій частині живота</li>
+    <li><strong>Стегна</strong> — по найширшій частині сідниць</li>
+  </ul>
+
+  <p>
+    Розміри джинсів вказуємо в числовому форматі (30, 32, 34…) — це обхват талії
+    в дюймах, він завжди зазначений в описі конкретного товару.
+  </p>
+</article>
+{% endblock %}

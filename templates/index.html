@@ -1,0 +1,268 @@
+{% extends "base.html" %} {% from "_icons.html" import icon %} {% from
+"_product_card.html" import product_card %} {% block content %}
+
+<section class="hero hero--video">
+  <video
+    class="hero__video"
+    id="heroVideo"
+    autoplay
+    muted
+    loop
+    playsinline
+    webkit-playsinline
+    preload="auto"
+    disablepictureinpicture
+    disableremoteplayback
+    x-webkit-airplay="deny"
+    onerror="this.closest('.hero').classList.add('hero--no-video')"
+  >
+    <source
+      src="https://assets.mixkit.co/videos/34707/34707-360.mp4"
+      type="video/mp4"
+    />
+  </video>
+  <div class="hero__overlay"></div>
+
+  <div class="hero__inner hero__inner--center">
+    <span class="eyebrow eyebrow--light">Колекція SS 26</span>
+    <h1>Сезон, який хочеться носити</h1>
+    <p class="hero__text">
+      Від базових футболок до курток на міжсезоння — нова колекція для міста,
+      дороги та всього, що між ними.
+    </p>
+    <div class="hero__buttons">
+      <a href="{{ url_for('catalog.catalog') }}" class="btn btn--primary"
+        >Дивитися каталог</a
+      >
+      <a href="#contacts" class="btn btn--ghost-light">Наші контакти</a>
+    </div>
+  </div>
+</section>
+
+<section class="benefits">
+  <div class="benefits__inner">
+    {% for b in benefits %}
+    <div class="benefit">
+      <span class="benefit__icon">{{ icon(b.icon, 20) }}</span>
+      <div>
+        <p class="benefit__title">{{ b.title }}</p>
+        <p class="benefit__text">{{ b.text }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="categories">
+  <div class="section-head">
+    <span class="eyebrow">Категорії</span>
+    <h2>З чого почати</h2>
+  </div>
+  {% if categories %}
+  <div class="categories__grid">
+    {% for c in categories %}
+    <a
+      href="{{ url_for('catalog.catalog', cat_slug=c.category.parent.slug, sub_slug=c.category.slug) }}"
+      class="cat-tile cat-tile--{{ 'large' if loop.first else 'small' }} {{ 'cat-tile--has-photo' if c.category.photo_url else '' }}"
+    >
+      {% if c.category.photo_url %}
+      <img
+        src="{{ c.category.photo_url }}"
+        alt="{{ c.category.name }}"
+        class="cat-tile__photo"
+      />
+      {% else %}
+      <span class="cat-tile__icon"
+        ><i
+          class="fa-solid {{ c.icon }}"
+          style="font-size:{{ 40 if loop.first else 26 }}px"
+        ></i
+      ></span>
+      {% endif %}
+      <span class="cat-tile__tag">
+        <span class="cat-tile__tag-hole"></span>
+        {{ c.category.name }}
+      </span>
+      <span class="cat-tile__count"
+        >{{ c.count }} {{ 'товар' if c.count == 1 else 'товарів' }}</span
+      >
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-folder-open"></i>
+    <p>Категорій ще немає.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="showcase" id="showcase">
+  <div class="section-head section-head--row">
+    <div>
+      <span class="eyebrow">Вітрина</span>
+      <h2>Що всі беруть</h2>
+    </div>
+    <div class="tabs" role="tablist">
+      <button
+        class="tab is-active"
+        data-tab="hits"
+        role="tab"
+        aria-selected="true"
+      >
+        Хіти продажів
+      </button>
+      <button class="tab" data-tab="new" role="tab" aria-selected="false">
+        Новинки
+      </button>
+      <button class="tab" data-tab="sale" role="tab" aria-selected="false">
+        Знижки
+      </button>
+    </div>
+  </div>
+
+  <div class="product-slider-wrap">
+    <button
+      type="button"
+      class="slider-arrow slider-arrow--prev"
+      aria-label="Попередні товари"
+    >
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    {% for key, list in products.items() %}
+    <div
+      class="product-slider {{ 'is-active' if loop.first else '' }}"
+      data-panel="{{ key }}"
+    >
+      {% if list %} {% for p in list %} {{ product_card(p) }} {% endfor %} {%
+      else %}
+      <div class="empty-state product-slider__empty">
+        <i class="fa-solid fa-box-open"></i>
+        <p>Тут поки порожньо.</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <button
+      type="button"
+      class="slider-arrow slider-arrow--next"
+      aria-label="Наступні товари"
+    >
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="showcase__more">
+    <a href="{{ url_for('catalog.catalog') }}" class="btn btn--ghost"
+      >Дивитися весь каталог</a
+    >
+  </div>
+</section>
+
+<section class="contacts" id="contacts">
+  <div class="section-head">
+    <span class="eyebrow">Де нас знайти</span>
+    <h2>Контакти</h2>
+  </div>
+
+  <div class="contacts__layout">
+    <div class="contacts__info">
+      <div class="contacts__row">
+        <i class="fa-solid fa-location-dot"></i>
+        <div>
+          <p class="contacts__label">Магазин</p>
+          <p>м. Харків, вул. Сумська, 10</p>
+        </div>
+      </div>
+      <div class="contacts__row">
+        <i class="fa-solid fa-phone"></i>
+        <div>
+          <p class="contacts__label">Телефон</p>
+          <a href="tel:+380501234567">+38 (050) 123-45-67</a>
+        </div>
+      </div>
+      <div class="contacts__row">
+        <i class="fa-solid fa-envelope"></i>
+        <div>
+          <p class="contacts__label">Email</p>
+          <a href="mailto:hello@metka.ua">hello@metka.ua</a>
+        </div>
+      </div>
+      <div class="contacts__row">
+        <i class="fa-solid fa-clock"></i>
+        <div>
+          <p class="contacts__label">Графік роботи</p>
+          <p>Пн–Пт: 10:00–19:00<br />Сб–Нд: 11:00–17:00</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="storeMap" class="contacts__map"></div>
+  </div>
+</section>
+
+{% endblock %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+/>
+{% endblock %} {% block extra_scripts %}
+<script>
+  (function () {
+    var video = document.getElementById("heroVideo");
+    if (!video) return;
+
+    // Деякі версії Safari довіряють властивостям, виставленим ДО спроби play(),
+    // надійніше за самі HTML-атрибути.
+    video.muted = true;
+    video.defaultMuted = true;
+    video.volume = 0;
+
+    var resumed = false;
+    function resumeOnInteraction() {
+      if (resumed) return;
+      resumed = true;
+      video.play().catch(function () {});
+    }
+    ["click", "touchstart", "scroll", "keydown"].forEach(function (evt) {
+      document.addEventListener(evt, resumeOnInteraction, {
+        once: true,
+        passive: true,
+      });
+    });
+
+    function tryPlay() {
+      var p = video.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(function () {
+          // Автозапуск заблокував браузер (типово для Safari на першому візиті) —
+          // обробник взаємодії вище підхопить відтворення сам.
+        });
+      }
+    }
+
+    video.load();
+    tryPlay();
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+  })();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  var storeMap = L.map("storeMap", { scrollWheelZoom: false }).setView(
+    [49.9935, 36.2304],
+    15
+  );
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  }).addTo(storeMap);
+  L.marker([49.9935, 36.2304])
+    .addTo(storeMap)
+    .bindPopup("<strong>Original Brands</strong><br>вул. Сумська, 10, Харків")
+    .openPopup();
+</script>
+{% endblock %}

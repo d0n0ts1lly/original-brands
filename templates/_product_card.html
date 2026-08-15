@@ -1,0 +1,42 @@
+{% macro product_card(p) %}
+<article class="product-card">
+  <a
+    href="{{ url_for('product.detail', product_id=p.id) }}"
+    class="product-card__link"
+  >
+    <div class="product-card__media">
+      {% if p.main_photo %}
+      <img
+        class="product-card__img"
+        src="{{ p.main_photo.url }}"
+        alt="{{ p.name }}"
+      />
+      {% else %}
+      <span class="product-card__icon"
+        ><i class="fa-solid fa-shirt" style="font-size: 40px"></i
+      ></span>
+      {% endif %} {% if p.discount_percent %}
+      <span class="product-card__badge">
+        <span class="product-card__badge-hole"></span>-{{ p.discount_percent }}%
+      </span>
+      {% endif %}
+    </div>
+    <p class="product-card__name">{{ p.name }}</p>
+    <p class="product-card__brand">{{ p.brand }}</p>
+    <p class="product-card__price">
+      {% if p.discount_price %} {{ "%.0f"|format(p.discount_price) }} ₴
+      <span class="product-card__old">{{ "%.0f"|format(p.price) }} ₴</span>
+      {% else %} {{ "%.0f"|format(p.price) }} ₴ {% endif %}
+    </p>
+  </a>
+  {% set in_stock = p.in_stock_sizes %} {% if in_stock %}
+  <div class="size-badges">
+    {% for s in in_stock %}
+    <span class="size-badge">{{ s.size }}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="product-card__oos">Немає в наявності</p>
+  {% endif %}
+</article>
+{% endmacro %}

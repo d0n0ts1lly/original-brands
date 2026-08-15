@@ -1,0 +1,57 @@
+{% extends "admin/_base.html" %} {% set active_nav = "orders" %} {% block title
+%}Адмін — замовлення{% endblock %} {% block admin_content %}
+<div class="admin-page-head">
+  <h2>Замовлення</h2>
+</div>
+
+{% if orders %}
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>Дата</th>
+        <th>Отримувач</th>
+        <th>Телефон</th>
+        <th>Місто</th>
+        <th>Сума</th>
+        <th>Статус</th>
+        <th>ТТН</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>№{{ o.id }}</td>
+        <td>{{ o.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td>{{ o.customer_name }}</td>
+        <td>{{ o.phone }}</td>
+        <td>{{ o.city }}</td>
+        <td>{{ "%.0f"|format(o.total) }} ₴</td>
+        <td>
+          <span class="status-badge status-badge--{{ o.status }}"
+            >{{ status_labels[o.status] }}</span
+          >
+        </td>
+        <td>{{ o.np_ttn or '—' }}</td>
+        <td class="admin-table__actions">
+          <a
+            href="{{ url_for('admin.order_detail', order_id=o.id) }}"
+            class="icon-btn"
+            aria-label="Відкрити замовлення"
+          >
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fa-solid fa-receipt"></i>
+  <p>Замовлень поки немає.</p>
+</div>
+{% endif %} {% endblock %}

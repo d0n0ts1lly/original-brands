@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar__brand">
+      <i class="fa-solid fa-tag"></i> Original Brands · Адмін
+    </div>
+    <p class="admin-sidebar__user">
+      <i class="fa-solid fa-circle-user"></i> {{ session.get('admin_username',
+      '') }}
+    </p>
+
+    <nav class="admin-sidebar__nav">
+      <a
+        href="{{ url_for('admin.products_list') }}"
+        class="{{ 'is-active' if active_nav == 'products' else '' }}"
+      >
+        <i class="fa-solid fa-shirt"></i> Товари
+      </a>
+      <a
+        href="{{ url_for('admin.categories_list') }}"
+        class="{{ 'is-active' if active_nav == 'categories' else '' }}"
+      >
+        <i class="fa-solid fa-folder-tree"></i> Категорії
+      </a>
+      <a
+        href="{{ url_for('admin.orders_list') }}"
+        class="{{ 'is-active' if active_nav == 'orders' else '' }}"
+      >
+        <i class="fa-solid fa-receipt"></i> Замовлення
+      </a>
+    </nav>
+
+    <div class="admin-sidebar__footer">
+      <a href="{{ url_for('catalog.catalog') }}" target="_blank" rel="noopener">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> Переглянути сайт
+      </a>
+      <form method="POST" action="{{ url_for('auth.logout') }}">
+        <button type="submit">
+          <i class="fa-solid fa-right-from-bracket"></i> Вийти
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="admin-main">{% block admin_content %}{% endblock %}</div>
+</div>
+{% endblock %}

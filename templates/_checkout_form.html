@@ -1,0 +1,106 @@
+<form
+  method="POST"
+  action="{{ url_for('checkout.checkout') }}"
+  class="admin-form checkout-form"
+>
+  <div>
+    <div class="form-grid checkout-fields">
+      <label class="field field--full">
+        <span>ПІБ отримувача <span class="field__required">*</span></span>
+        <input
+          type="text"
+          name="customer_name"
+          value="{{ form.get('customer_name', '') }}"
+          placeholder="Іваненко Іван Іванович"
+          required
+        />
+      </label>
+      <label class="field">
+        <span>Телефон <span class="field__required">*</span></span>
+        <input
+          type="tel"
+          name="phone"
+          id="checkoutPhoneInput"
+          value="{{ form.get('phone', '') }}"
+          placeholder="+380 XX XXX XX XX"
+          inputmode="tel"
+          required
+        />
+      </label>
+      <label class="field">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          id="checkoutEmailInput"
+          value="{{ form.get('email', '') }}"
+          placeholder="mail@example.com"
+        />
+      </label>
+      <label class="field np-field">
+        <span>Місто <span class="field__required">*</span></span>
+        <input
+          type="text"
+          name="city"
+          id="checkoutCityInput"
+          value="{{ form.get('city', '') }}"
+          placeholder="Почніть вводити назву міста…"
+          autocomplete="off"
+          required
+        />
+        <div class="np-suggestions" id="checkoutCitySuggestions"></div>
+      </label>
+      <label class="field np-field">
+        <span
+          >Відділення / поштомат <span class="field__required">*</span></span
+        >
+        <input
+          type="text"
+          name="np_branch"
+          id="checkoutBranchInput"
+          value="{{ form.get('np_branch', '') }}"
+          placeholder="Спершу оберіть місто"
+          autocomplete="off"
+          required
+        />
+        <div class="np-suggestions" id="checkoutBranchSuggestions"></div>
+      </label>
+    </div>
+  </div>
+
+  <label class="field">
+    <span>Коментар до замовлення</span>
+    <textarea
+      name="comment"
+      rows="3"
+      placeholder="Побажання щодо доставки чи упаковки…"
+    >
+{{ form.get('comment', '') }}</textarea
+    >
+  </label>
+
+  <div class="admin-form__submit">
+    <button type="submit" class="btn btn--primary">
+      Підтвердити замовлення
+    </button>
+  </div>
+</form>
+
+{% if show_summary %}
+<aside class="checkout-summary">
+  <h3>Ваше замовлення</h3>
+  {% for item in items %}
+  <div class="checkout-summary__row">
+    <span
+      >{{ item.product.name }} · {{ item.size.size }} × {{ item.quantity
+      }}</span
+    >
+    <span>{{ "%.0f"|format(item.subtotal) }} ₴</span>
+  </div>
+  {% endfor %}
+  <div class="checkout-summary__total">
+    <span>Разом</span>
+    <span>{{ "%.0f"|format(total) }} ₴</span>
+  </div>
+</aside>
+{% endif %}

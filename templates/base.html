@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}Original Brands — магазин одягу{% endblock %}
+    </title>
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{ url_for('static', filename='img/favicon-16.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', filename='img/favicon-32.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{{ url_for('static', filename='img/favicon-192.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="{{ url_for('static', filename='img/apple-touch-icon.png') }}"
+    />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='img/favicon.ico') }}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar__inner">
+        <span>Доставка по всій Україні — Нова пошта</span>
+        <span class="topbar__sep">•</span>
+        <span>Безкоштовний обмін протягом 14 днів</span>
+      </div>
+    </div>
+
+    <header class="header">
+      <div class="header__inner">
+        <button
+          class="header__burger"
+          aria-label="Відкрити меню"
+          aria-expanded="false"
+          id="burgerBtn"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="header__nav" id="mainNav">
+          {% for cat in nav_categories %}
+          <div class="nav-item">
+            <a href="{{ url_for('catalog.catalog', cat_slug=cat.slug) }}"
+              >{{ cat.name }}</a
+            >
+            {% if cat.children %}
+            <div class="nav-dropdown">
+              {% for sub in cat.children %}
+              <a
+                href="{{ url_for('catalog.catalog', cat_slug=cat.slug, sub_slug=sub.slug) }}"
+                >{{ sub.name }}</a
+              >
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </nav>
+
+        <a href="/" class="logo" aria-label="Original Brands — на головну">
+          <img
+            class="logo__mark"
+            src="{{ url_for('static', filename='img/logo.png') }}"
+            alt="Original Brands"
+          />
+        </a>
+
+        <div class="header__actions">
+          {% if is_admin %}
+          <a
+            href="{{ url_for('admin.products_list') }}"
+            class="icon-btn"
+            aria-label="Адмін-панель"
+            title="Адмін-панель"
+          >
+            <i class="fa-solid fa-user-shield"></i>
+          </a>
+          {% endif %}
+          <button
+            class="icon-btn header__search-toggle"
+            aria-label="Пошук"
+            id="searchToggle"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <a
+            href="{{ url_for('product.cart_view') }}"
+            class="icon-btn"
+            aria-label="Кошик"
+          >
+            <i class="fa-solid fa-cart-shopping"></i>
+            {% if cart_count %}<span class="icon-btn__count"
+              >{{ cart_count }}</span
+            >{% endif %}
+          </a>
+        </div>
+      </div>
+
+      <div class="header__search" id="searchPanel">
+        <form
+          class="header__search-inner"
+          method="GET"
+          action="{{ url_for('catalog.catalog') }}"
+        >
+          <input
+            type="text"
+            name="q"
+            placeholder="Шукати товари, бренди…"
+            aria-label="Пошук по каталогу"
+            value="{{ request.args.get('q', '') }}"
+          />
+          <button type="submit" class="header__search-submit">
+            <i class="fa-solid fa-magnifying-glass"></i> Шукати
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a
+            href="/"
+            class="logo logo--footer"
+            aria-label="Original Brands — на головну"
+          >
+            <img
+              class="logo__mark"
+              src="{{ url_for('static', filename='img/logo.png') }}"
+              alt="Original Brands"
+            />
+          </a>
+          <p class="footer__tagline">Одяг, у якого є характер.</p>
+        </div>
+
+        <div class="footer__col">
+          <h4>Про магазин</h4>
+          <a href="{{ url_for('pages.about') }}">Про нас</a>
+          <a href="{{ url_for('pages.delivery') }}">Доставка та оплата</a>
+          <a href="{{ url_for('pages.size_guide') }}">Таблиця розмірів</a>
+          <a href="{{ url_for('main.index') }}#contacts">Контакти</a>
+        </div>
+
+        <div class="footer__col">
+          <h4>Покупцям</h4>
+          <a href="{{ url_for('pages.how_to_order') }}"
+            >Як зробити замовлення</a
+          >
+          <a href="{{ url_for('pages.returns') }}">Повернення та обмін</a>
+        </div>
+
+        <div class="footer__col footer__col--social">
+          <h4>Ми в соцмережах</h4>
+          <div class="footer__social">
+            <a href="#" aria-label="Instagram" class="social-hole"
+              ><i class="fa-brands fa-instagram"></i
+            ></a>
+            <a href="#" aria-label="Telegram" class="social-hole"
+              ><i class="fa-brands fa-telegram"></i
+            ></a>
+            <a href="#" aria-label="TikTok" class="social-hole"
+              ><i class="fa-brands fa-tiktok"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Original Brands. Усі права захищені.</span>
+      </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

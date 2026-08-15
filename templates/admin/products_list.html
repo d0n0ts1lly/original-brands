@@ -1,0 +1,94 @@
+{% extends "admin/_base.html" %} {% set active_nav = "products" %} {% block
+title %}Адмін — товари{% endblock %} {% block admin_content %}
+<div class="admin-page-head">
+  <h2>Товари</h2>
+  <a href="{{ url_for('admin.product_new') }}" class="btn btn--primary">
+    <i class="fa-solid fa-plus"></i>&nbsp; Додати товар
+  </a>
+</div>
+
+{% if products %}
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Фото</th>
+        <th>Назва</th>
+        <th>Бренд</th>
+        <th>Категорія</th>
+        <th>Артикул</th>
+        <th>Ціна</th>
+        <th>Розміри / залишки</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td class="admin-table__thumb">
+          {% if p.main_photo %}
+          <img src="{{ p.main_photo.url }}" alt="{{ p.name }}" />
+          {% else %}
+          <i class="fa-solid fa-shirt"></i>
+          {% endif %}
+        </td>
+        <td>
+          <a
+            href="{{ url_for('product.detail', product_id=p.id) }}"
+            target="_blank"
+            >{{ p.name }}</a
+          >
+        </td>
+        <td>{{ p.brand }}</td>
+        <td>{{ p.category.name if p.category else '—' }}</td>
+        <td><span class="sku">{{ p.sku }}</span></td>
+        <td>
+          {% if p.discount_price %}
+          <span class="price-strike">{{ "%.0f"|format(p.price) }} ₴</span>
+          {{ "%.0f"|format(p.discount_price) }} ₴ {% else %} {{
+          "%.0f"|format(p.price) }} ₴ {% endif %}
+        </td>
+        <td>
+          {% for s in p.sizes %}
+          <span
+            class="size-badge {{ 'size-badge--empty' if s.quantity == 0 else '' }}"
+            >{{ s.size }}: {{ s.quantity }}</span
+          >
+          {% endfor %}
+        </td>
+        <td class="admin-table__actions">
+          <a
+            href="{{ url_for('admin.product_edit', product_id=p.id) }}"
+            class="icon-btn"
+            aria-label="Редагувати товар"
+          >
+            <i class="fa-solid fa-pen"></i>
+          </a>
+          <form
+            method="POST"
+            action="{{ url_for('admin.product_delete', product_id=p.id) }}"
+            onsubmit="return confirm('Видалити «{{ p.name }}»?');"
+          >
+            <button
+              type="submit"
+              class="icon-btn icon-btn--danger"
+              aria-label="Видалити товар"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fa-solid fa-box-open"></i>
+  <p>Товарів поки немає.</p>
+  <a href="{{ url_for('admin.product_new') }}" class="btn btn--primary"
+    >Додати перший товар</a
+  >
+</div>
+{% endif %} {% endblock %}

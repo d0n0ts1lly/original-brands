@@ -1,0 +1,76 @@
+{% extends "admin/_base.html" %}
+{% set active_nav = "orders" %}
+{% block title %}Адмін — замовлення №{{ order.id }}{% endblock %}
+
+{% block admin_content %}
+<a href="{{ url_for('admin.orders_list') }}" class="back-link"><i class="fa-solid fa-arrow-left"></i> До списку замовлень</a>
+<div class="admin-page-head">
+  <h2>Замовлення №{{ order.id }}</h2>
+  <span class="status-badge status-badge--{{ order.status }}">{{ status_labels[order.status] }}</span>
+</div>
+
+<h3 class="admin-block-title">Склад замовлення</h3>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr><th>Товар</th><th>Розмір</th><th>Ціна</th><th>Кількість</th><th>Сума</th></tr>
+    </thead>
+    <tbody>
+      {% for item in order.items %}
+      <tr>
+        <td><a href="{{ url_for('product.detail', product_id=item.product_id) }}" target="_blank">{{ item.product.name }}</a></td>
+        <td>{{ item.size.size }}</td>
+        <td>{{ "%.0f"|format(item.price) }} ₴</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ "%.0f"|format(item.price * item.quantity) }} ₴</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="admin-block-total">Разом: {{ "%.0f"|format(order.total) }} ₴</p>
+
+<form method="POST" class="admin-form" style="margin-top: 30px;">
+  <div class="form-grid">
+    <label class="field">
+      <span>Статус</span>
+      <select name="status">
+        {% for s in statuses %}
+        <option value="{{ s }}" {{ 'selected' if s == order.status }}>{{ status_labels[s] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span>ТТН (Нова пошта)</span>
+      <input type="text" name="np_ttn" value="{{ order.np_ttn or '' }}" placeholder="20450000000000">
+    </label>
+    <label class="field">
+      <span>ПІБ отримувача</span>
+      <input type="text" name="customer_name" value="{{ order.customer_name }}" required>
+    </label>
+    <label class="field">
+      <span>Телефон</span>
+      <input type="text" name="phone" value="{{ order.phone }}" required>
+    </label>
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" value="{{ order.email or '' }}">
+    </label>
+    <label class="field">
+      <span>Місто</span>
+      <input type="text" name="city" value="{{ order.city }}" required>
+    </label>
+    <label class="field" style="grid-column: 1 / -1;">
+      <span>Відділення / поштомат Нової пошти</span>
+      <input type="text" name="np_branch" value="{{ order.np_branch }}" required>
+    </label>
+  </div>
+  <label class="field">
+    <span>Коментар</span>
+    <textarea name="comment" rows="3">{{ order.comment or '' }}</textarea>
+  </label>
+  <div class="admin-form__submit">
+    <button type="submit" class="btn btn--primary">Зберегти зміни</button>
+  </div>
+</form>
+{% endblock %}

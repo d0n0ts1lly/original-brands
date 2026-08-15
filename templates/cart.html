@@ -1,0 +1,120 @@
+{% extends "base.html" %} {% block title %}Кошик — Original Brands{% endblock %} {% block
+content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('main.index') }}">Головна</a>
+  <span>/</span>
+  <span>Кошик</span>
+</div>
+
+<section class="cart-page">
+  <div class="section-head">
+    <span class="eyebrow">Ваші товари</span>
+    <h2>Кошик</h2>
+  </div>
+
+  {% if items %}
+  <div class="cart-list">
+    {% for item in items %}
+    <div class="cart-row">
+      <div class="cart-row__media">
+        {% if item.product.main_photo %}
+        <img
+          src="{{ item.product.main_photo.url }}"
+          alt="{{ item.product.name }}"
+        />
+        {% else %}
+        <i class="fa-solid fa-shirt"></i>
+        {% endif %}
+      </div>
+      <div class="cart-row__info">
+        <a href="{{ url_for('product.detail', product_id=item.product.id) }}"
+          >{{ item.product.name }}</a
+        >
+        <span
+          >Розмір: {{ item.size.size }} · Кількість: {{ item.quantity }}</span
+        >
+      </div>
+      <div class="cart-row__price">{{ "%.0f"|format(item.subtotal) }} ₴</div>
+      <form method="POST" action="{{ url_for('product.cart_remove') }}">
+        <input type="hidden" name="key" value="{{ item.key }}" />
+        <button
+          type="submit"
+          class="icon-btn icon-btn--danger"
+          aria-label="Прибрати з кошика"
+        >
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="cart-summary">
+    <span>Разом: <strong>{{ "%.0f"|format(total) }} ₴</strong></span>
+    <button type="button" class="btn btn--primary" id="openCheckoutModal">
+      Оформити замовлення
+    </button>
+  </div>
+
+  <div class="modal-overlay" id="checkoutModal">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkoutModalTitle"
+    >
+      <button
+        type="button"
+        class="modal-panel__close"
+        id="closeCheckoutModal"
+        aria-label="Закрити"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="modal-panel__head">
+        <span class="eyebrow">Останній крок</span>
+        <h2 id="checkoutModalTitle">Оформлення замовлення</h2>
+      </div>
+      <div class="modal-panel__body checkout-layout">
+        {% set show_summary = false %} {% include "_checkout_form.html" %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <p>Кошик поки порожній.</p>
+    <a href="{{ url_for('catalog.catalog') }}" class="btn btn--primary"
+      >До каталогу</a
+    >
+  </div>
+  {% endif %}
+</section>
+{% endblock %} {% block extra_scripts %}
+<script>
+  (function () {
+    var modal = document.getElementById("checkoutModal");
+    var openBtn = document.getElementById("openCheckoutModal");
+    var closeBtn = document.getElementById("closeCheckoutModal");
+    if (!modal || !openBtn) return;
+
+    function open() {
+      modal.classList.add("is-open");
+      document.body.classList.add("modal-open");
+    }
+    function close() {
+      modal.classList.remove("is-open");
+      document.body.classList.remove("modal-open");
+    }
+
+    openBtn.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) close();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) close();
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block title %}Оформлення замовлення — Original Brands{%
+endblock %} {% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('main.index') }}">Головна</a>
+  <span>/</span>
+  <a href="{{ url_for('product.cart_view') }}">Кошик</a>
+  <span>/</span>
+  <span>Оформлення</span>
+</div>
+
+<section class="checkout">
+  <div class="section-head">
+    <span class="eyebrow">Останній крок</span>
+    <h2>Оформлення замовлення</h2>
+  </div>
+
+  <div class="checkout-layout">
+    {% set show_summary = true %} {% include "_checkout_form.html" %}
+  </div>
+</section>
+{% endblock %}

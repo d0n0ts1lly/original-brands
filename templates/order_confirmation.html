@@ -1,0 +1,37 @@
+{% extends "base.html" %} {% block title %}Дякуємо за замовлення — Original Brands{%
+endblock %} {% block content %}
+<section class="confirmation">
+  <div class="confirmation__icon"><i class="fa-solid fa-circle-check"></i></div>
+  <h1>Дякуємо, {{ order.customer_name.split(' ')[0] }}!</h1>
+  <p>
+    Замовлення <strong>№{{ order.id }}</strong> оформлено. Ми зв'яжемось за
+    телефоном {{ order.phone }} для підтвердження.
+  </p>
+
+  <div class="confirmation__details">
+    <div>
+      <span>Доставка</span><span>{{ order.city }}, {{ order.np_branch }}</span>
+    </div>
+    <div>
+      <span>Разом до сплати</span
+      ><span>{{ "%.0f"|format(order.total) }} ₴</span>
+    </div>
+  </div>
+
+  <div class="confirmation__items">
+    {% for item in order.items %}
+    <div class="checkout-summary__row">
+      <span
+        >{{ item.product.name }} · {{ item.size.size }} × {{ item.quantity
+        }}</span
+      >
+      <span>{{ "%.0f"|format(item.price * item.quantity) }} ₴</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="{{ url_for('catalog.catalog') }}" class="btn btn--primary"
+    >Продовжити покупки</a
+  >
+</section>
+{% endblock %}
