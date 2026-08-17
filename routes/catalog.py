@@ -1,4 +1,6 @@
-from flask import Blueprint, abort, render_template, request
+from urllib.parse import urlencode
+
+from flask import Blueprint, abort, make_response, render_template, request
 from sqlalchemy import func, or_
 
 from models import Category, Product, ProductSize, db
@@ -11,6 +13,20 @@ SORT_LABELS = {
     "price_desc": "Дорожчі спочатку",
     "name": "За назвою",
 }
+
+PAGE_SIZE = 20
+
+# Порядок розмірів для фільтра — від найменшого до найбільшого,
+# а не за алфавітом (інакше "L" опиняється перед "S", "XL" перед "M" тощо).
+SIZE_ORDER = ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "XXL"]
+
+
+def _size_sort_key(size):
+    if size in SIZE_ORDER:
+        return (0, SIZE_ORDER.index(size))
+    # Розміри поза стандартним переліком (наприклад, числові) —
+    # у кінець списку, за власним алфавітним/числовим порядком.
+    return (1, size)
 
 
 @catalog_bp.route("/catalog")
@@ -41,7 +57,7 @@ def catalog(cat_slug=None, sub_slug=None):
     # щоб чекбокси не "стрибали", поки людина щось вибирає.
     facet_products = base_query.all()
     available_brands = sorted({p.brand for p in facet_products})
-    available_sizes = sorted({s.size for p in facet_products for s in p.sizes})
+    available_sizes = sorted({s.size for p in facet_products for s in p.sizes}, key=_size_sort_key)
 
     effective_price = func.coalesce(Product.discount_price, Product.price)
     query = base_query
@@ -83,9 +99,36 @@ def catalog(cat_slug=None, sub_slug=None):
 
     products = query.all()
 
+    page = request.args.get("page", 1, type=int)
+    if page < 1:
+        page = 1
+
+    total_count = len(products)
+    start = (page - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
+    page_products = products[start:end]
+    has_more = end < total_count
+
+    is_partial = request.headers.get("X-Requested-With") == "fetch"
+    if is_partial:
+        html = render_template("_product_cards_only.html", products=page_products)
+        response = make_response(html)
+        response.headers["X-Has-More"] = "1" if has_more else "0"
+        return response
+
+    # Для кнопки "Завантажити ще" — рядок поточних фільтрів без page,
+    # щоб JS міг сам дописати наступну сторінку.
+    filter_params = request.args.to_dict(flat=False)
+    filter_params.pop("page", None)
+    filters_query_string = urlencode(filter_params, doseq=True)
+
     return render_template(
         "catalog.html",
-        products=products,
+        products=page_products,
+        total_count=total_count,
+        has_more=has_more,
+        next_page=page + 1,
+        filters_query_string=filters_query_string,
         active_category=active_category,
         active_sub=active_sub,
         available_brands=available_brands,

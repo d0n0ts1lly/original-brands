@@ -45,7 +45,7 @@
       {% if available_sizes %}
       <div class="filters__group">
         <h4>Розмір</h4>
-        <div class="filters__checks">
+        <div class="filters__checks filters__checks--list">
           {% for sz in available_sizes %}
           <label class="filters__check">
             <input type="checkbox" name="size" value="{{ sz }}" {{ 'checked' if sz in selected_sizes }}>
@@ -78,7 +78,7 @@
 
     <div class="catalog-results">
       <div class="catalog-results__head">
-        <span>{{ products|length }} {{ 'товар' if products|length == 1 else 'товарів' }}</span>
+        <span>{{ total_count }} {{ 'товар' if total_count == 1 else 'товарів' }}</span>
         <label class="catalog-results__sort">
           <span>Сортування:</span>
           <select name="sort" form="filtersForm" onchange="document.getElementById('filtersForm').submit()">
@@ -95,6 +95,20 @@
         {{ product_card(p) }}
         {% endfor %}
       </div>
+      {% if has_more %}
+      <div class="catalog__load-more">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          id="loadMoreBtn"
+          data-path="{{ request.path }}"
+          data-query="{{ filters_query_string }}"
+          data-next-page="{{ next_page }}"
+        >
+          Завантажити ще
+        </button>
+      </div>
+      {% endif %}
       {% else %}
       <div class="empty-state">
         <i class="fa-solid fa-box-open"></i>

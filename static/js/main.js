@@ -1,13 +1,88 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Шапка завжди position: fixed (див. CSS) — а її «top» щокадрово
+  // підлаштовується під скрол, тому вона плавно виїжджає з-під topbar
+  // і лишається зверху, без різких стрибків чи зникнення (був баг із
+  // position: sticky, а потім — різкий стрибок при перемиканні класу).
+  // Spacer резервує сталу висоту шапки один раз і більше не змінюється.
+  const topbarEl = document.querySelector(".topbar");
+  const headerEl = document.querySelector(".header");
+  const headerSpacer = document.getElementById("headerSpacer");
+
+  if (headerEl) {
+    let topbarHeight = topbarEl ? topbarEl.offsetHeight : 0;
+
+    const measure = () => {
+      topbarHeight = topbarEl ? topbarEl.offsetHeight : 0;
+      if (headerSpacer)
+        headerSpacer.style.height = headerEl.offsetHeight + "px";
+    };
+
+    const update = () => {
+      const offset = Math.max(0, topbarHeight - window.scrollY);
+      headerEl.style.top = offset + "px";
+    };
+
+    let ticking = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            update();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      },
+      { passive: true }
+    );
+
+    window.addEventListener("resize", () => {
+      measure();
+      update();
+    });
+    window.addEventListener("load", () => {
+      measure();
+      update();
+    });
+
+    measure();
+    update();
+  }
+
   // Мобильное бургер-меню
   const burgerBtn = document.getElementById("burgerBtn");
   const mainNav = document.getElementById("mainNav");
+  const navCloseBtn = document.getElementById("navCloseBtn");
+  const navBackdrop = document.getElementById("navBackdrop");
 
   if (burgerBtn && mainNav) {
-    burgerBtn.addEventListener("click", () => {
-      const isOpen = mainNav.classList.toggle("is-open");
+    const setNavOpen = (isOpen) => {
+      mainNav.classList.toggle("is-open", isOpen);
       burgerBtn.classList.toggle("is-open", isOpen);
       burgerBtn.setAttribute("aria-expanded", isOpen);
+      if (navBackdrop) navBackdrop.classList.toggle("is-open", isOpen);
+    };
+
+    burgerBtn.addEventListener("click", () => {
+      setNavOpen(!mainNav.classList.contains("is-open"));
+    });
+
+    // Крестик усередині меню — закриває його
+    if (navCloseBtn) {
+      navCloseBtn.addEventListener("click", () => setNavOpen(false));
+    }
+
+    // Клік мимо меню (по затемненому фону) — теж закриває
+    if (navBackdrop) {
+      navBackdrop.addEventListener("click", () => setNavOpen(false));
+    }
+
+    // Esc — закриває меню
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mainNav.classList.contains("is-open")) {
+        setNavOpen(false);
+      }
     });
 
     // На мобильном тап по пункту меню раскрывает подкатегории
@@ -124,6 +199,65 @@ document.addEventListener("DOMContentLoaded", () => {
       categoriesGrid.addEventListener("mouseleave", start);
       categoriesGrid.addEventListener("focusin", stop);
       categoriesGrid.addEventListener("focusout", start);
+    }
+  }
+
+  // Каталог: кнопка «Завантажити ще» (+ автопідвантаження, коли кнопка
+  // з'являється у зоні видимості — ефект нескінченного скролу)
+  const loadMoreBtn = document.getElementById("loadMoreBtn");
+  const catalogGrid = document.querySelector(".catalog__grid");
+
+  if (loadMoreBtn && catalogGrid) {
+    let nextPage = parseInt(loadMoreBtn.dataset.nextPage, 10) || 2;
+    let isLoading = false;
+    const path = loadMoreBtn.dataset.path || window.location.pathname;
+    const baseQuery = loadMoreBtn.dataset.query || "";
+
+    const loadMore = () => {
+      if (isLoading) return;
+      isLoading = true;
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = "Завантаження…";
+
+      const qs = baseQuery
+        ? `${baseQuery}&page=${nextPage}`
+        : `page=${nextPage}`;
+
+      fetch(`${path}?${qs}`, { headers: { "X-Requested-With": "fetch" } })
+        .then((res) => {
+          const hasMore = res.headers.get("X-Has-More") === "1";
+          return res.text().then((html) => ({ html, hasMore }));
+        })
+        .then(({ html, hasMore }) => {
+          catalogGrid.insertAdjacentHTML("beforeend", html);
+          nextPage += 1;
+          isLoading = false;
+          if (hasMore) {
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = "Завантажити ще";
+          } else {
+            loadMoreBtn.remove();
+          }
+        })
+        .catch(() => {
+          isLoading = false;
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = "Завантажити ще";
+        });
+    };
+
+    loadMoreBtn.addEventListener("click", loadMore);
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) loadMore();
+          });
+        },
+        { rootMargin: "600px" }
+      );
+      observer.observe(loadMoreBtn);
     }
   }
 });

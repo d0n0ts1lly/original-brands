@@ -20,6 +20,61 @@
   --radius-s: 4px;
 }
 
+/* ============================================
+     Альтернативні теми — щоб спробувати, просто закоментуй
+     блок :root вище і розкоментуй один з блоків нижче.
+     Назви змінних лишаються ті самі (--cream, --leather тощо),
+     так само як і всі місця в файлі, де вони використовуються —
+     міняється тільки сама палітра/шрифти, верстку чіпати не треба.
+  
+     Якщо міняєш і шрифти — не забудь підмінити посилання на
+     Google Fonts у <head> (templates/base.html) на відповідні.
+     ============================================ */
+
+/* --- Тема 2: "Шавлія" (Sage) — м'яка зелено-оливкова, той самий
+         ремісничий/бутіковий настрій, тільки прохолодніша й спокійніша ---
+  :root {
+    --cream: #e3e8d8;
+    --cream-soft: #eef1e6;
+    --paper: #f8faf4;
+    --ink: #17201a;
+    --coffee: #3c4a35;
+    --camel: #7c9463;
+    --leather: #4f6b3d;
+    --leather-dark: #37492c;
+    --line: #c3d0ad;
+    --line-soft: #d7e0c4;
+  
+    --font-display: "Fraunces", "Georgia", serif;
+    --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  
+    --container: 1240px;
+    --radius-s: 4px;
+  }
+  */
+
+/* --- Тема 3: "Північ" (Midnight) — холодна нічно-синя, дорожче
+         і трохи суворіше, добре пасує під зимову/чоловічу колекцію ---
+  :root {
+    --cream: #dfe3ea;
+    --cream-soft: #eceff4;
+    --paper: #f7f9fc;
+    --ink: #10151f;
+    --coffee: #2c3648;
+    --camel: #6c86b0;
+    --leather: #2f4c7a;
+    --leather-dark: #1f3557;
+    --line: #c2ccdc;
+    --line-soft: #d7deeb;
+  
+    --font-display: "Cormorant Garamond", "Georgia", serif;
+    --font-body: "Sora", "Helvetica Neue", Arial, sans-serif;
+  
+    --container: 1240px;
+    --radius-s: 4px;
+  }
+  */
+
 * {
   box-sizing: border-box;
 }
@@ -145,6 +200,7 @@ h3 {
 .topbar {
   background: var(--coffee);
   color: var(--cream-soft);
+  margin-bottom: 96px !important;
 }
 .topbar__inner {
   max-width: var(--container);
@@ -165,15 +221,21 @@ h3 {
          Header
          ============================================ */
 .header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 35px;
+  left: 0;
+  right: 0;
   z-index: 40;
   background: var(--cream);
   border-bottom: 1px solid var(--line);
-  /* Власний композитний шар, щоб шапка не зникала на швидкому/різкому скролі
-         (типовий баг рендерингу position: sticky без цього на мобільних браузерах). */
-  transform: translateZ(0);
-  will-change: transform;
+}
+/* main.js щокадрово виставляє top (inline style) під час скролу —
+       плавне 1:1 стеження замість різкого перемикання класу/position.
+       35px вище — орієнтовна висота topbar, щоб не «блимало» до першого
+       виміру JS; так само 116px нижче — приблизна topbar + header. */
+.header-spacer {
+  display: block;
+  height: 116px;
 }
 .header__inner {
   max-width: var(--container);
@@ -201,6 +263,9 @@ h3 {
   display: flex;
   gap: 30px;
   justify-self: start;
+}
+.header__nav-close {
+  display: none;
 }
 .nav-item {
   position: relative;
@@ -295,27 +360,13 @@ h3 {
 
 .header__burger {
   display: none;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
   width: 24px;
   height: 24px;
   justify-self: start;
-}
-.header__burger span {
-  height: 2px;
-  background: var(--ink);
-  width: 100%;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.header__burger.is-open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-.header__burger.is-open span:nth-child(2) {
-  opacity: 0;
-}
-.header__burger.is-open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
+  font-size: 18px;
+  color: var(--ink);
 }
 
 .header__search {
@@ -821,6 +872,9 @@ a.social-hole:hover {
 }
 
 @media (max-width: 720px) {
+  .topbar {
+    margin-bottom: 80px !important;
+  }
   .topbar__inner {
     font-size: 11.5px;
   }
@@ -835,7 +889,13 @@ a.social-hole:hover {
   }
   .header__burger {
     display: flex;
-    order: 0;
+    order: 2;
+    position: relative;
+    z-index: 31;
+  }
+  .header__burger.is-open {
+    opacity: 0;
+    pointer-events: none;
   }
   .header__actions {
     order: 1;
@@ -855,6 +915,38 @@ a.social-hole:hover {
   }
   .header__nav.is-open {
     transform: translateX(0);
+  }
+  .header__nav-close {
+    display: flex;
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--cream-soft);
+    color: var(--coffee);
+    font-size: 15px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .header__nav-close:hover {
+    background: var(--cream);
+    color: var(--leather);
+  }
+  .nav-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(33, 23, 16, 0.4);
+    z-index: 25;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .nav-backdrop.is-open {
+    display: block;
+    opacity: 1;
   }
   .nav-item {
     width: 100%;
@@ -1244,7 +1336,7 @@ a.social-hole:hover {
 
 .std-size-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 .std-size {
@@ -1412,11 +1504,12 @@ a.social-hole:hover {
          ============================================ */
 .category-tree {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   margin-bottom: 30px;
 }
 .category-tree__group {
+  min-width: 0;
   border: 1px solid var(--line-soft);
   border-radius: 10px;
   padding: 18px;
@@ -1428,6 +1521,8 @@ a.social-hole:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .category-tree__top i {
   color: var(--leather);
@@ -1444,7 +1539,9 @@ a.social-hole:hover {
   font-size: 13.5px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 .category-tree__empty {
   margin: 0;
@@ -1713,9 +1810,6 @@ a.social-hole:hover {
     text-align: center;
   }
 
-  .category-tree {
-    grid-template-columns: 1fr;
-  }
   .admin-shell {
     padding: 24px 20px 70px;
   }
@@ -2002,6 +2096,18 @@ a.social-hole:hover {
   margin: 0;
   padding: 0;
 }
+.catalog__load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 34px;
+}
+.catalog__load-more .btn {
+  min-width: 200px;
+}
+.catalog__load-more .btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
 
 @media (max-width: 900px) {
   .catalog-layout {
@@ -2073,9 +2179,11 @@ a.social-hole:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 .category-tree__actions {
   display: flex;
+  flex-shrink: 0;
   gap: 2px;
 }
 .category-tree__actions .icon-btn {
@@ -2094,11 +2202,12 @@ a.social-hole:hover {
   align-items: center;
 }
 .category-edit-form.is-open {
-  display: flex;
+  display: grid;
 }
 .category-edit-form input,
 .category-edit-form select {
   flex: 1;
+  min-width: 0;
   border: 1px solid var(--line);
   background: var(--paper);
   border-radius: var(--radius-s);
@@ -2554,12 +2663,16 @@ a.social-hole:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 .category-edit-form.is-open {
   flex-wrap: wrap;
 }
 .category-edit-form input[type="file"] {
   flex: 1 1 160px;
+  min-width: 0;
   font-size: 12px;
   padding: 6px 8px;
 }

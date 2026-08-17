@@ -5,7 +5,7 @@ from models import Category, OrderItem, Product, ProductPhoto, ProductSize, db
 from . import admin_bp
 from ._uploads import save_uploaded_photo, delete_uploaded_photo
 
-STANDARD_SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
+STANDARD_SIZES = ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL"]
 PHOTO_SUBFOLDER = "products"
 
 

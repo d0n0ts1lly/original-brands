@@ -51,7 +51,7 @@
           <img src="{{ sub.photo_url }}" alt="" class="category-tree__thumb category-tree__thumb--sm">
           {% endif %}
           {{ sub.name }} <span class="sku">/{{ top.slug }}/{{ sub.slug }}</span>
-          {% if sub.is_featured %}<span class="featured-tag"><i class="fa-solid fa-star"></i> на головній</span>{% endif %}
+          {% if sub.is_featured %}<span class="featured-tag"><i class="fa-solid fa-star"></i></span>{% endif %}
         </span>
         <span class="category-tree__actions">
           <button type="button" class="icon-btn" aria-label="Редагувати" onclick="document.getElementById('edit-{{ sub.id }}').classList.toggle('is-open')">
