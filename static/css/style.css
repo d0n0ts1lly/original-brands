@@ -2685,6 +2685,11 @@ a.social-hole:hover {
   white-space: nowrap;
 }
 
+.category-edit-form input[type="checkbox"] {
+  flex: none;
+  width: auto;
+}
+
 /* ============================================
          Product slider (homepage showcase — always one row)
          ============================================ */
