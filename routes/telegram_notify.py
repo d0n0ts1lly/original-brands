@@ -29,7 +29,8 @@ def notify_new_order(order):
     lines.append("")
     for item in order.items:
         line_total = float(item.price) * item.quantity
-        lines.append(f"• {item.product.name} ({item.size.size}) × {item.quantity} — {line_total:.0f} ₴")
+        variant = f"{item.size.color.name}, {item.size.size}" if item.size.color else item.size.size
+        lines.append(f"• {item.product.name} ({variant}) × {item.quantity} — {line_total:.0f} ₴")
 
     lines.append("")
     lines.append(f"Разом: {order.total:.0f} ₴")

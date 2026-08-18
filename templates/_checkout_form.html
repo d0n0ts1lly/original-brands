@@ -92,8 +92,8 @@
   {% for item in items %}
   <div class="checkout-summary__row">
     <span
-      >{{ item.product.name }} · {{ item.size.size }} × {{ item.quantity
-      }}</span
+      >{{ item.product.name }} · {% if item.size.color %}{{ item.size.color.name
+      }}, {% endif %}{{ item.size.size }} × {{ item.quantity }}</span
     >
     <span>{{ "%.0f"|format(item.subtotal) }} ₴</span>
   </div>

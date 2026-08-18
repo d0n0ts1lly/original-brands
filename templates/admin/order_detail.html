@@ -19,7 +19,7 @@
       {% for item in order.items %}
       <tr>
         <td><a href="{{ url_for('product.detail', product_id=item.product_id) }}" target="_blank">{{ item.product.name }}</a></td>
-        <td>{{ item.size.size }}</td>
+        <td>{{ item.size.color.name + ', ' if item.size.color else '' }}{{ item.size.size }}</td>
         <td>{{ "%.0f"|format(item.price) }} ₴</td>
         <td>{{ item.quantity }}</td>
         <td>{{ "%.0f"|format(item.price * item.quantity) }} ₴</td>

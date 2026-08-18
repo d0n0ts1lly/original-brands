@@ -1413,6 +1413,79 @@ a.social-hole:hover {
   background: var(--cream-soft);
 }
 
+#colorBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.color-block {
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--cream-soft);
+}
+.color-block__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.color-block__name {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: var(--radius-s);
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.color-block__name:focus {
+  border-color: var(--leather);
+}
+.color-block__swatch-input {
+  flex-shrink: 0;
+  width: 40px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  cursor: pointer;
+}
+.color-block__sizes {
+  margin-bottom: 10px;
+}
+.color-block__sizes:empty {
+  display: none;
+}
+.color-block__photos-head {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coffee);
+  margin: 14px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.color-block__photos-head small {
+  font-weight: 500;
+  text-transform: none;
+}
+.color-block__photo-rows {
+  margin-bottom: 10px;
+}
+.existing-photos--compact {
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.existing-photos--compact .existing-photo {
+  width: 72px;
+}
+.existing-photos--compact .existing-photo img {
+  height: 72px;
+}
+
 .admin-form__submit {
   display: flex;
   justify-content: flex-end;
@@ -1621,9 +1694,10 @@ a.social-hole:hover {
 
 .add-to-cart-form {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   gap: 18px;
-  align-items: flex-end;
+  align-items: flex-start;
   margin-bottom: 30px;
 }
 .size-picker {
@@ -1653,6 +1727,41 @@ a.social-hole:hover {
   background: var(--leather);
   border-color: var(--leather);
   color: var(--cream-soft);
+}
+.color-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.color-picker__option {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.color-picker__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.color-picker__swatch {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.color-picker__option input:checked + .color-picker__swatch {
+  box-shadow: 0 0 0 2px var(--leather);
+  transform: scale(1.06);
+}
+.color-picker__label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--coffee);
 }
 .add-to-cart-form input[type="number"] {
   border: 1px solid var(--line);

@@ -1,6 +1,8 @@
+import json
+
 from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 
-from models import Product, ProductSize
+from models import Product, ProductSize, size_sort_key
 
 product_bp = Blueprint("product", __name__)
 
@@ -12,7 +14,30 @@ def _get_cart():
 @product_bp.route("/product/<int:product_id>")
 def detail(product_id):
     product = Product.query.get_or_404(product_id)
-    return render_template("product_detail.html", p=product)
+
+    # Розміри в наявності, відсортовані по кольору (за його sort_order,
+    # товари без кольору йдуть першими) і всередині — за розміром 2XS→3XL.
+    color_order = {c.id: i for i, c in enumerate(product.colors)}
+    sorted_sizes = sorted(
+        product.in_stock_sizes,
+        key=lambda s: (color_order.get(s.color_id, -1), size_sort_key(s.size)),
+    )
+
+    # Фото по кольору — для JS-перемикача галереї на сторінці товару.
+    # Якщо в конкретного кольору своїх фото нема — ключа для нього просто
+    # не буде, і JS сам залишить дефолтну (загальну) галерею як є.
+    color_photos = {
+        c.id: [p.url for p in c.photos] for c in product.colors if c.photos
+    }
+
+    return render_template(
+        "product_detail.html",
+        p=product,
+        sorted_sizes=sorted_sizes,
+        colors_in_stock=product.colors_in_stock,
+        color_photos_json=json.dumps(color_photos),
+        default_photos_json=json.dumps([p.url for p in product.display_photos]),
+    )
 
 
 @product_bp.route("/product/<int:product_id>/add-to-cart", methods=["POST"])
@@ -43,7 +68,8 @@ def add_to_cart(product_id):
 
     cart[key] = already_in_cart + quantity
     session.modified = True
-    flash(f"«{product.name}» ({size.size}) додано в кошик", "success")
+    variant = f"{size.color.name}, {size.size}" if size.color else size.size
+    flash(f"«{product.name}» ({variant}) додано в кошик", "success")
     return redirect(url_for("product.detail", product_id=product.id))
 
 

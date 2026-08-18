@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from flask import Blueprint, abort, make_response, render_template, request
 from sqlalchemy import func, or_
 
-from models import Category, Product, ProductSize, db
+from models import Category, Product, ProductSize, db, size_sort_key
 
 catalog_bp = Blueprint("catalog", __name__)
 
@@ -15,18 +15,6 @@ SORT_LABELS = {
 }
 
 PAGE_SIZE = 20
-
-# Порядок розмірів для фільтра — від найменшого до найбільшого,
-# а не за алфавітом (інакше "L" опиняється перед "S", "XL" перед "M" тощо).
-SIZE_ORDER = ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "XXL"]
-
-
-def _size_sort_key(size):
-    if size in SIZE_ORDER:
-        return (0, SIZE_ORDER.index(size))
-    # Розміри поза стандартним переліком (наприклад, числові) —
-    # у кінець списку, за власним алфавітним/числовим порядком.
-    return (1, size)
 
 
 @catalog_bp.route("/catalog")
@@ -57,7 +45,7 @@ def catalog(cat_slug=None, sub_slug=None):
     # щоб чекбокси не "стрибали", поки людина щось вибирає.
     facet_products = base_query.all()
     available_brands = sorted({p.brand for p in facet_products})
-    available_sizes = sorted({s.size for p in facet_products for s in p.sizes}, key=_size_sort_key)
+    available_sizes = sorted({s.size for p in facet_products for s in p.sizes}, key=size_sort_key)
 
     effective_price = func.coalesce(Product.discount_price, Product.price)
     query = base_query

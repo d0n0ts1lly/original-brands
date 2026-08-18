@@ -1,112 +1,226 @@
 {% extends "base.html" %} {% block title %}{{ p.name }} — Original Brands{% endblock %} {%
-block content %}
-<div class="breadcrumbs">
-  <a href="{{ url_for('main.index') }}">Головна</a>
-  <span>/</span>
-  {% if p.category and p.category.parent %}
-  <a href="{{ url_for('catalog.catalog', cat_slug=p.category.parent.slug) }}"
-    >{{ p.category.parent.name }}</a
-  >
-  <span>/</span>
-  <a
-    href="{{ url_for('catalog.catalog', cat_slug=p.category.parent.slug, sub_slug=p.category.slug) }}"
-    >{{ p.category.name }}</a
-  >
-  <span>/</span>
-  {% endif %}
-  <span>{{ p.name }}</span>
-</div>
-
-<section class="product-detail">
-  <div class="product-detail__gallery">
-    <div class="product-detail__main-photo">
-      {% if p.photos %}
-      <img src="{{ p.photos[0].url }}" alt="{{ p.name }}" id="mainPhoto" />
-      {% else %}
-      <span class="product-detail__icon"
-        ><i class="fa-solid fa-shirt"></i
-      ></span>
-      {% endif %} {% if p.discount_percent %}
-      <span class="product-card__badge">
-        <span class="product-card__badge-hole"></span>-{{ p.discount_percent }}%
-      </span>
-      {% endif %}
-    </div>
-    {% if p.photos|length > 1 %}
-    <div class="product-detail__thumbs">
-      {% for photo in p.photos %}
-      <button
-        type="button"
-        class="product-detail__thumb"
-        data-src="{{ photo.url }}"
-      >
-        <img src="{{ photo.url }}" alt="{{ p.name }}" />
-      </button>
-      {% endfor %}
-    </div>
-    {% endif %}
-  </div>
-
-  <div class="product-detail__info">
-    <span class="eyebrow">{{ p.brand }}</span>
-    <h1>{{ p.name }}</h1>
-
-    <p class="product-detail__price">
-      {% if p.discount_price %} {{ "%.0f"|format(p.discount_price) }} ₴
-      <span class="product-card__old">{{ "%.0f"|format(p.price) }} ₴</span>
-      {% else %} {{ "%.0f"|format(p.price) }} ₴ {% endif %}
-    </p>
-
-    {% if p.description %}
-    <p class="product-detail__description">{{ p.description }}</p>
-    {% endif %} {% if p.in_stock_sizes %}
-    <form
-      method="POST"
-      action="{{ url_for('product.add_to_cart', product_id=p.id) }}"
-      class="add-to-cart-form"
+  block content %}
+  <div class="breadcrumbs">
+    <a href="{{ url_for('main.index') }}">Головна</a>
+    <span>/</span>
+    {% if p.category and p.category.parent %}
+    <a href="{{ url_for('catalog.catalog', cat_slug=p.category.parent.slug) }}"
+      >{{ p.category.parent.name }}</a
     >
-      <div class="field">
-        <span>Розмір</span>
-        <div class="size-picker">
-          {% for s in p.in_stock_sizes %}
-          <label class="size-picker__option">
-            <input type="radio" name="size_id" value="{{ s.id }}" {{ 'checked'
-            if loop.first }}>
-            <span>{{ s.size }}</span>
-          </label>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="field" style="max-width: 120px">
-        <span>Кількість</span>
-        <input type="number" name="quantity" value="1" min="1" />
-      </div>
-      <button type="submit" class="btn btn--primary">
-        <i class="fa-solid fa-cart-plus"></i>&nbsp; Додати в кошик
-      </button>
-    </form>
-    {% else %}
-    <p class="product-card__oos">Немає в наявності</p>
+    <span>/</span>
+    <a
+      href="{{ url_for('catalog.catalog', cat_slug=p.category.parent.slug, sub_slug=p.category.slug) }}"
+      >{{ p.category.name }}</a
+    >
+    <span>/</span>
     {% endif %}
-
-    <dl class="product-detail__meta">
-      <div>
-        <dt>Артикул</dt>
-        <dd>{{ p.sku }}</dd>
-      </div>
-      <div>
-        <dt>Категорія</dt>
-        <dd>{{ p.category.name if p.category else '—' }}</dd>
-      </div>
-    </dl>
+    <span>{{ p.name }}</span>
   </div>
-</section>
-
-<script>
-  document.querySelectorAll(".product-detail__thumb").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.getElementById("mainPhoto").src = btn.dataset.src;
-    });
-  });
-</script>
-{% endblock %}
+  
+  <section class="product-detail">
+    <div class="product-detail__gallery">
+      <div class="product-detail__main-photo">
+        {% if p.display_photos %}
+        <img src="{{ p.display_photos[0].url }}" alt="{{ p.name }}" id="mainPhoto" />
+        {% else %}
+        <span class="product-detail__icon"
+          ><i class="fa-solid fa-shirt"></i
+        ></span>
+        {% endif %} {% if p.discount_percent %}
+        <span class="product-card__badge">
+          <span class="product-card__badge-hole"></span>-{{ p.discount_percent }}%
+        </span>
+        {% endif %}
+      </div>
+      <div class="product-detail__thumbs" id="photoThumbs" {{ '' if p.display_photos|length > 1 else 'style="display:none;"' }}>
+        {% for photo in p.display_photos %}
+        <button
+          type="button"
+          class="product-detail__thumb"
+          data-src="{{ photo.url }}"
+        >
+          <img src="{{ photo.url }}" alt="{{ p.name }}" />
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  
+    <div class="product-detail__info">
+      <span class="eyebrow">{{ p.brand }}</span>
+      <h1>{{ p.name }}</h1>
+  
+      <p class="product-detail__price">
+        {% if p.discount_price %} {{ "%.0f"|format(p.discount_price) }} ₴
+        <span class="product-card__old">{{ "%.0f"|format(p.price) }} ₴</span>
+        {% else %} {{ "%.0f"|format(p.price) }} ₴ {% endif %}
+      </p>
+  
+      {% if p.description %}
+      <p class="product-detail__description">{{ p.description }}</p>
+      {% endif %} {% if p.in_stock_sizes %}
+      <form
+        method="POST"
+        action="{{ url_for('product.add_to_cart', product_id=p.id) }}"
+        class="add-to-cart-form"
+      >
+        {% if colors_in_stock %}
+        <div class="field field--full">
+          <span>Колір</span>
+          <div class="color-picker" id="colorPicker">
+            {% for c in colors_in_stock %}
+            <label class="color-picker__option">
+              <input
+                type="radio"
+                name="color_choice"
+                value="{{ c.id }}"
+                data-color-id="{{ c.id }}"
+                {{ 'checked' if loop.first }}
+              />
+              <span
+                class="color-picker__swatch"
+                style="background: {{ c.hex_value or '#cfc3ad' }}"
+              ></span>
+              <span class="color-picker__label">{{ c.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        <div class="field">
+          <span>Розмір</span>
+          <div class="size-picker" id="sizePicker">
+            {% for s in sorted_sizes %}
+            <label
+              class="size-picker__option"
+              data-color-id="{{ s.color_id or '' }}"
+            >
+              <input type="radio" name="size_id" value="{{ s.id }}" {{ 'checked'
+              if loop.first }}>
+              <span>{{ s.size }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="max-width: 120px">
+          <span>Кількість</span>
+          <input type="number" name="quantity" value="1" min="1" />
+        </div>
+        <button type="submit" class="btn btn--primary">
+          <i class="fa-solid fa-cart-plus"></i>&nbsp; Додати в кошик
+        </button>
+      </form>
+      {% else %}
+      <p class="product-card__oos">Немає в наявності</p>
+      {% endif %}
+  
+      <dl class="product-detail__meta">
+        <div>
+          <dt>Артикул</dt>
+          <dd>{{ p.sku }}</dd>
+        </div>
+        <div>
+          <dt>Категорія</dt>
+          <dd>{{ p.category.name if p.category else '—' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+  
+  <script id="colorPhotosData" type="application/json">
+    {{ color_photos_json | safe }}
+  </script>
+  <script id="defaultPhotosData" type="application/json">
+    {{ default_photos_json | safe }}
+  </script>
+  
+  <script>
+    const mainPhotoEl = document.getElementById("mainPhoto");
+    const thumbsWrap = document.getElementById("photoThumbs");
+    const colorPhotosData = JSON.parse(
+      document.getElementById("colorPhotosData").textContent || "{}"
+    );
+    const defaultPhotos = JSON.parse(
+      document.getElementById("defaultPhotosData").textContent || "[]"
+    );
+  
+    const bindThumbClicks = () => {
+      document.querySelectorAll(".product-detail__thumb").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (mainPhotoEl) mainPhotoEl.src = btn.dataset.src;
+        });
+      });
+    };
+    bindThumbClicks();
+  
+    // Перебудовує галерею (головне фото + мініатюри) під конкретний набір URL
+    const renderGallery = (urls) => {
+      if (!urls || !urls.length) return; // у кольору нема своїх фото — лишаємо як є
+      if (mainPhotoEl) mainPhotoEl.src = urls[0];
+      if (!thumbsWrap) return;
+      if (urls.length > 1) {
+        thumbsWrap.innerHTML = urls
+          .map(
+            (u) => `
+          <button type="button" class="product-detail__thumb" data-src="${u}">
+            <img src="${u}" alt="">
+          </button>`
+          )
+          .join("");
+        thumbsWrap.style.display = "";
+        bindThumbClicks();
+      } else {
+        thumbsWrap.innerHTML = "";
+        thumbsWrap.style.display = "none";
+      }
+    };
+  
+    // Перемикач кольору — показує тільки розміри, які є саме в цьому кольорі,
+    // і підміняє галерею фото (якщо в кольору є власні; інакше лишає дефолтну)
+    const colorPicker = document.getElementById("colorPicker");
+    const sizePicker = document.getElementById("sizePicker");
+  
+    if (colorPicker && sizePicker) {
+      const sizeOptions = Array.from(
+        sizePicker.querySelectorAll(".size-picker__option")
+      );
+  
+      const applyColorFilter = (colorId) => {
+        let firstVisibleInput = null;
+        sizeOptions.forEach((opt) => {
+          const matches = opt.dataset.colorId === String(colorId);
+          opt.style.display = matches ? "" : "none";
+          if (matches && !firstVisibleInput) {
+            firstVisibleInput = opt.querySelector("input");
+          }
+        });
+        const checkedInput = sizePicker.querySelector("input:checked");
+        const checkedVisible =
+          checkedInput &&
+          checkedInput.closest(".size-picker__option").style.display !== "none";
+        if (!checkedVisible && firstVisibleInput) {
+          firstVisibleInput.checked = true;
+        }
+      };
+  
+      const applyColorPhotos = (colorId) => {
+        const photos = colorPhotosData[colorId];
+        renderGallery(photos && photos.length ? photos : defaultPhotos);
+      };
+  
+      colorPicker.querySelectorAll('input[name="color_choice"]').forEach((input) => {
+        input.addEventListener("change", () => {
+          applyColorFilter(input.value);
+          applyColorPhotos(input.value);
+        });
+      });
+  
+      const initiallyChecked = colorPicker.querySelector(
+        'input[name="color_choice"]:checked'
+      );
+      if (initiallyChecked) {
+        applyColorFilter(initiallyChecked.value);
+        applyColorPhotos(initiallyChecked.value);
+      }
+    }
+  </script>
+  {% endblock %}

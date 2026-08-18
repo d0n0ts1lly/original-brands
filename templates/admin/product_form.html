@@ -56,46 +56,125 @@
     <textarea name="description" rows="4" placeholder="Матеріал, склад, особливості крою…">{{ form.get('description', '') }}</textarea>
   </label>
 
-  <div>
-    <div class="form-section__head">
-      <h3>Стандартні розміри</h3>
-      <p>Впишіть кількість для тих розмірів, які є в наявності. Порожнє поле — розмір не додається.</p>
+  <label class="filters__check" style="margin-top: -14px;">
+    <input type="checkbox" id="hasColorsToggle" name="has_colors" {{ 'checked' if has_colors }}>
+    <span>У товару є кольори (для кожного кольору — свій набір розмірів)</span>
+  </label>
+
+  <div id="plainSizesSection" {{ 'style="display:none;"' if has_colors }}>
+    <div>
+      <div class="form-section__head">
+        <h3>Стандартні розміри</h3>
+        <p>Впишіть кількість для тих розмірів, які є в наявності. Порожнє поле — розмір не додається.</p>
+      </div>
+      <div class="std-size-grid">
+        {% for sz in std_sizes %}
+        <label class="std-size">
+          <span>{{ sz }}</span>
+          <input type="number" min="0" name="qty_{{ sz }}" value="{{ form.get('qty_' ~ sz, '') }}" placeholder="0">
+        </label>
+        {% endfor %}
+      </div>
     </div>
-    <div class="std-size-grid">
-      {% for sz in std_sizes %}
-      <label class="std-size">
-        <span>{{ sz }}</span>
-        <input type="number" min="0" name="qty_{{ sz }}" value="{{ form.get('qty_' ~ sz, '') }}" placeholder="0">
-      </label>
-      {% endfor %}
+
+    <div>
+      <div class="form-section__head">
+        <h3>Додаткові розміри <small>(необов'язково)</small></h3>
+        <p>Для нестандартних значень — наприклад, числові розміри джинсів: 30, 32, 34.</p>
+      </div>
+      <div id="sizeRows" class="repeatable">
+        {% for size, qty in custom_rows %}
+        <div class="repeatable__row">
+          <input type="text" name="size[]" value="{{ size }}" placeholder="Наприклад, 32" class="repeatable__size">
+          <input type="number" name="quantity[]" value="{{ qty }}" min="0" placeholder="Кількість" class="repeatable__qty">
+          <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати розмір">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" id="addSizeRow" class="btn btn--ghost">
+        <i class="fa-solid fa-plus"></i>&nbsp; Додати розмір
+      </button>
     </div>
   </div>
 
-  <div>
+  <div id="colorsSection" {{ '' if has_colors else 'style="display:none;"' }}>
     <div class="form-section__head">
-      <h3>Додаткові розміри <small>(необов'язково)</small></h3>
-      <p>Для нестандартних значень — наприклад, числові розміри джинсів: 30, 32, 34.</p>
+      <h3>Кольори товару</h3>
+      <p>Для кожного кольору — назва, зразок кольору (необов'язково) і власний набір розмірів із кількістю.</p>
     </div>
-    <div id="sizeRows" class="repeatable">
-      {% for size, qty in custom_rows %}
-      <div class="repeatable__row">
-        <input type="text" name="size[]" value="{{ size }}" placeholder="Наприклад, 32" class="repeatable__size">
-        <input type="number" name="quantity[]" value="{{ qty }}" min="0" placeholder="Кількість" class="repeatable__qty">
-        <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати розмір">
-          <i class="fa-solid fa-xmark"></i>
+    <div id="colorBlocks" data-next-index="{{ existing_colors|length }}">
+      {% for c in existing_colors %}
+      <div class="color-block" data-color-index="{{ c.idx }}">
+        {% if c.id %}<input type="hidden" name="color_id_{{ c.idx }}" value="{{ c.id }}">{% endif %}
+        <div class="color-block__head">
+          <input type="text" name="color_name_{{ c.idx }}" value="{{ c.name }}" placeholder="Напр. Чорний" class="color-block__name">
+          <input type="color" name="color_hex_{{ c.idx }}" value="{{ c.hex or '#1a1a1a' }}" class="color-block__swatch-input" title="Зразок кольору">
+          <button type="button" class="icon-btn icon-btn--danger color-block__remove" aria-label="Прибрати колір">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="repeatable color-block__sizes" data-color-rows>
+          {% for size, qty in c.sizes %}
+          <div class="repeatable__row">
+            <input type="text" name="color_size_{{ c.idx }}[]" value="{{ size }}" placeholder="Наприклад, M" class="repeatable__size" list="sizeSuggestions">
+            <input type="number" name="color_qty_{{ c.idx }}[]" value="{{ qty }}" min="0" placeholder="Кількість" class="repeatable__qty">
+            <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати розмір">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn btn--ghost color-block__add-size">
+          <i class="fa-solid fa-plus"></i>&nbsp; Додати розмір
+        </button>
+
+        <div class="color-block__photos-head">Фото цього кольору <small>(необов'язково — якщо не додати, на сторінці товару лишаться загальні фото)</small></div>
+        {% if c.photos %}
+        <div class="existing-photos existing-photos--compact">
+          {% for photo in c.photos %}
+          <label class="existing-photo">
+            <img src="{{ photo.url }}" alt="">
+            <span class="existing-photo__delete">
+              <input type="checkbox" name="delete_photo[]" value="{{ photo.id }}">
+              <i class="fa-solid fa-trash"></i> Видалити
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="repeatable color-block__photo-rows" data-color-photo-rows>
+          <div class="repeatable__row repeatable__row--photo">
+            <input type="file" name="color_photo_file_{{ c.idx }}[]" accept="image/png,image/jpeg,image/webp,image/gif" class="repeatable__file">
+            <span class="repeatable__or">або</span>
+            <input type="url" name="color_photo_url_{{ c.idx }}[]" placeholder="https://…" class="repeatable__url">
+            <button type="button" class="icon-btn icon-btn--danger repeatable__remove" aria-label="Прибрати фото">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="btn btn--ghost color-block__add-photo">
+          <i class="fa-solid fa-plus"></i>&nbsp; Додати фото кольору
         </button>
       </div>
       {% endfor %}
     </div>
-    <button type="button" id="addSizeRow" class="btn btn--ghost">
-      <i class="fa-solid fa-plus"></i>&nbsp; Додати розмір
+    <button type="button" id="addColorBlock" class="btn btn--ghost">
+      <i class="fa-solid fa-plus"></i>&nbsp; Додати колір
     </button>
   </div>
+
+  <datalist id="sizeSuggestions">
+    {% for sz in std_sizes %}
+    <option value="{{ sz }}">
+    {% endfor %}
+  </datalist>
 
   <div>
     <div class="form-section__head">
       <h3>Фото товару <small>(необов'язково)</small></h3>
-      <p>Завантажте файл із комп'ютера або вставте посилання — досить одного з двох. Перший рядок стане головним фото.</p>
+      <p>Завантажте файл із комп'ютера або вставте посилання — досить одного з двох. Перший рядок стане головним фото. Якщо у товару є кольори без власних фото — покажуться саме ці.</p>
     </div>
 
     {% if existing_photos %}

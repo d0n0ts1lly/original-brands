@@ -1,5 +1,5 @@
-{% extends "base.html" %} {% block title %}Дякуємо за замовлення — Original Brands{%
-endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Дякуємо за замовлення — Original
+Brands{% endblock %} {% block content %}
 <section class="confirmation">
   <div class="confirmation__icon"><i class="fa-solid fa-circle-check"></i></div>
   <h1>Дякуємо, {{ order.customer_name.split(' ')[0] }}!</h1>
@@ -22,8 +22,9 @@ endblock %} {% block content %}
     {% for item in order.items %}
     <div class="checkout-summary__row">
       <span
-        >{{ item.product.name }} · {{ item.size.size }} × {{ item.quantity
-        }}</span
+        >{{ item.product.name }} · {% if item.size.color %}{{
+        item.size.color.name }}, {% endif %}{{ item.size.size }} × {{
+        item.quantity }}</span
       >
       <span>{{ "%.0f"|format(item.price * item.quantity) }} ₴</span>
     </div>
